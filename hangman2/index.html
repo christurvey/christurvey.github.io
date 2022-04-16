@@ -1,0 +1,798 @@
+<HTML >
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- <script src="js/easlejs-NEXT.min.js"></script> -->
+    <script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+<script src="nitrateadventure_HTML5-1519146031766.js"></script>
+<title>Nitrate Adventure</title>
+ <!-- <script src="js/tw.js"></script> -->
+  <!--<script src="js/tweenjs-NEXT.min.js"></script>-->
+
+  <script>
+var canvas, stage, exportRoot, anim_container, dom_overlay_container, fnStartAnimation;
+function init() {
+  console.log("initted");
+	canvas = document.getElementById("canvas");
+	anim_container = document.getElementById("animation_container");
+	dom_overlay_container = document.getElementById("dom_overlay_container");
+	var comp=AdobeAn.getComposition("350E008266B94054989F0F7014CF6D77");
+	var lib=comp.getLibrary();
+	var loader = new createjs.LoadQueue(false);
+	loader.addEventListener("fileload", function(evt){handleFileLoad(evt,comp)});
+	loader.addEventListener("complete", function(evt){handleComplete(evt,comp)});
+	var lib=comp.getLibrary();
+	loader.loadManifest(lib.properties.manifest);
+}
+function handleFileLoad(evt, comp) {
+	var images=comp.getImages();	
+	if (evt && (evt.item.type == "image")) { images[evt.item.id] = evt.result; }	
+}
+function handleComplete(evt,comp) {
+	//This function is always called, irrespective of the content. You can use the variable "stage" after it is created in token create_stage.
+	var lib=comp.getLibrary();
+	var ss=comp.getSpriteSheet();
+	var queue = evt.target;
+	var ssMetadata = lib.ssMetadata;
+	for(i=0; i<ssMetadata.length; i++) {
+		ss[ssMetadata[i].name] = new createjs.SpriteSheet( {"images": [queue.getResult(ssMetadata[i].name)], "frames": ssMetadata[i].frames} )
+	}
+	exportRoot = new lib.nitrateadventure_HTML5();
+	stage = new lib.Stage(canvas);	
+	//Registers the "tick" event listener.
+	fnStartAnimation = function() {
+		stage.addChild(exportRoot);
+		createjs.Ticker.setFPS(lib.properties.fps);
+		createjs.Ticker.addEventListener("tick", stage)
+		stage.addEventListener("tick", handleTick)
+		function handleTick(event) {
+			var cameraInstance = exportRoot.___camera___instance;
+			if(cameraInstance)
+			{
+				var stageCenter = { 'x' : lib.properties.width/2, 'y' : lib.properties.height/2 };
+				if(cameraInstance._off != null && cameraInstance._off == true)
+					exportRoot.transformMatrix = new createjs.Matrix2D();
+				else
+				{
+					if(cameraInstance.pinToObject !== undefined)
+					{
+						cameraInstance.x = cameraInstance.pinToObject.x + cameraInstance.pinToObject.pinOffsetX;
+						cameraInstance.y = cameraInstance.pinToObject.y + cameraInstance.pinToObject.pinOffsetY;
+					}
+					var mat = cameraInstance.getMatrix();
+					mat.tx -= stageCenter.x;
+					mat.ty -= stageCenter.y;
+					var inverseMat = mat.invert();
+					inverseMat.prependTransform(stageCenter.x, stageCenter.y, 1, 1, 0, 0, 0, 0, 0);
+					inverseMat.appendTransform(-stageCenter.x, -stageCenter.y, 1, 1, 0, 0, 0, 0, 0);
+					exportRoot.transformMatrix = inverseMat;
+				}
+			}
+		}
+	}	    
+	//Code to support hidpi screens and responsive scaling.
+	function makeResponsive(isResp, respDim, isScale, scaleType) {		
+		var lastW, lastH, lastS=1;		
+		window.addEventListener('resize', resizeCanvas);		
+		resizeCanvas();		
+		function resizeCanvas() {			
+			var w = lib.properties.width, h = lib.properties.height;			
+			var iw = window.innerWidth, ih=window.innerHeight;			
+			var pRatio = window.devicePixelRatio || 1, xRatio=iw/w, yRatio=ih/h, sRatio=1;			
+			if(isResp) {                
+				if((respDim=='width'&&lastW==iw) || (respDim=='height'&&lastH==ih)) {                    
+					sRatio = lastS;                
+				}				
+				else if(!isScale) {					
+					if(iw<w || ih<h)						
+						sRatio = Math.min(xRatio, yRatio);				
+				}				
+				else if(scaleType==1) {					
+					sRatio = Math.min(xRatio, yRatio);				
+				}				
+				else if(scaleType==2) {					
+					sRatio = Math.max(xRatio, yRatio);				
+				}			
+			}			
+			canvas.width = w*pRatio*sRatio;			
+			canvas.height = h*pRatio*sRatio;
+			canvas.style.width = dom_overlay_container.style.width = anim_container.style.width =  w*sRatio+'px';				
+			canvas.style.height = anim_container.style.height = dom_overlay_container.style.height = h*sRatio+'px';
+			stage.scaleX = pRatio*sRatio;			
+			stage.scaleY = pRatio*sRatio;			
+			lastW = iw; lastH = ih; lastS = sRatio;            
+			stage.tickOnUpdate = false;            
+			stage.update();            
+			stage.tickOnUpdate = true;		
+		}
+	}
+	makeResponsive(false,'both',false,1);	
+	AdobeAn.compositionLoaded(lib.properties.id);
+	fnStartAnimation();
+}
+</script>
+  <style>
+  html, body, div, span, applet, object, iframe,
+  h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+  a, abbr, acronym, address, big, cite, code,
+  del, dfn, em, img, ins, kbd, q, s, samp,
+  small, strike, strong, sub, sup, tt, var,
+  b, u, i, center,
+  dl, dt, dd, ol, ul, li,
+  fieldset, form, label, legend,
+  table, caption, tbody, tfoot, thead, tr, th, td,
+  article, aside, canvas, details, embed,
+  figure, figcaption, footer, header, hgroup,
+  menu, nav, output, ruby, section, summary,
+  time, mark, audio, video {
+  	margin: 0;
+  	padding: 0;
+  	border: 0;
+  	font-size: 100%;
+  	font: inherit;
+  	vertical-align: baseline;
+  }
+  /* HTML5 display-role reset for older browsers */
+  article, aside, details, figcaption, figure,
+  footer, header, hgroup, menu, nav, section {
+  	display: block;
+  }
+  body {
+  	line-height: 1;
+  }
+  ol, ul {
+  	list-style: none;
+  }
+  blockquote, q {
+  	quotes: none;
+  }
+  blockquote:before, blockquote:after,
+  q:before, q:after {
+  	content: '';
+  	content: none;
+  }
+  table {
+  	border-collapse: collapse;
+  	border-spacing: 0;
+  }
+
+  body {
+background:#fff;
+font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+color: #000;
+font-size: 18px;
+padding:5px;
+}
+
+  #game {
+background:#fff;
+font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+color: #000;
+text-align: center;
+font-size: 18px;
+}
+
+.wrappper {
+width: 100%;
+margin: 0 auto;
+}
+.wrappper:after {
+content: "";
+display: table;
+clear: both;
+}
+
+canvas {
+color: #fff;
+//border: #fff dashed 2px;
+padding: 15px;
+}
+
+h1, h2, h3 {
+font-family: 'Roboto', sans-serif;
+font-weight: 100;
+text-transform: uppercase;
+margin: 5px 0;
+}
+
+h1 {
+font-size: 2.6em;
+}
+
+h2 {
+font-size: 1.6em;
+}
+
+p {
+font-size: 1.6em;
+}
+
+#alphabet {
+margin: 3px auto;
+padding: 0;
+max-width: 900px;
+}
+#alphabet:after {
+content: "";
+display: table;
+clear: both;
+}
+
+#introView li {
+margin: 0 3px 3px 0;
+list-style:inside;
+padding: 5px;
+}
+
+#alphabet li {
+float: left;
+margin: 0 3px 3px 0;
+list-style: none;
+min-width: 45px;
+min-height: 35px;
+padding-top: 10px;
+background: #ccc;
+color: rgb(105, 182, 176);
+cursor: pointer;
+-moz-border-radius: 5px;
+-webkit-border-radius: 5px;
+border-radius: 5px;
+-khtml-border-radius: 5px;
+border: solid 1px #fff;
+}
+#alphabet li:hover {
+background: rgb(85, 162, 156);
+border: solid 1px #fff;
+color: #fff;
+}
+
+#my-word {
+margin: 0;
+display: block;
+padding: 0;
+display: block;
+}
+
+#my-word li {
+position: relative;
+list-style: none;
+margin: 0;
+display: inline-block;
+padding: 3px;
+font-size: 1.6em;
+ background-color: rgba(255, 255, 255, 0.7);
+
+}
+
+.active {
+opacity: 0.4;
+filter: alpha(opacity=40);
+-moz-transition: all 1s ease-in;
+-moz-transition: all 0.3s ease-in-out;
+-webkit-transition: all 0.3s ease-in-out;
+cursor: default;
+}
+.active:hover {
+-moz-transition: all 1s ease-in;
+-moz-transition: all 0.3s ease-in-out;
+-webkit-transition: all 0.3s ease-in-out;
+opacity: 0.4;
+filter: alpha(opacity=40);
+-moz-transition: all 1s ease-in;
+-moz-transition: all 0.3s ease-in-out;
+-webkit-transition: all 0.3s ease-in-out;
+}
+
+#mylives {
+font-size: 1.6em;
+text-align: center;
+display: block;
+}
+
+button {
+-moz-border-radius: 5px;
+-webkit-border-radius: 5px;
+border-radius: 5px;
+-khtml-border-radius: 5px;
+background: #CCC;
+color: #ccc;
+border: solid 1px #fff;
+text-decoration: none;
+cursor: pointer;
+font-size: 1.2em;
+padding: 15px 8px;
+width: 180px;
+margin: 10px;
+outline: none;
+}
+button:hover {
+-webkit-transition: all 0.3s ease-in-out;
+-moz-transition: all 0.3s ease-in-out;
+transition: all 0.3s ease-in-out;
+background: #fff;
+border: solid 1px #fff;
+color: rgb(105, 182, 176);
+}
+
+@media (max-width: 767px) {
+#alphabet {
+  padding: 0 0 0 10px;
+}
+}
+@media (max-width: 480px) {
+#alphabet {
+  padding: 0 0 0 15px;
+}
+}
+catagoryName {
+  float: right;
+}
+#canvas, #animation_container {
+  /*position: absolute;  */
+ 
+  left: 0;
+  right: 0;
+  margin:auto;
+  z-index: -1;
+padding:0px;
+}
+#buttons {
+    /*position: absolute;
+        top: 320px;*/
+   /*// padding-top: 10px;*/
+
+}
+#my-word li.break{
+
+display: block;
+}
+
+#letter {
+  -webkit-user-select: none; /* Chrome/Safari */
+-moz-user-select: none; /* Firefox */
+-ms-user-select: none; /* IE10+ */
+
+/* Rules below not implemented in browsers yet */
+-o-user-select: none;
+user-select: none;
+}
+
+.hidden {
+    display: none;
+}
+.hoh2 {
+background:rgba(230,230,230,0.95);
+padding:10px;width:95%;
+max-width:800px;
+position:absolute;
+top:10px;
+left:10px;
+}
+.modalReset {
+   -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    -khtml-border-radius: 5px;
+    background: rgba(255, 255, 255, 1);
+    color: rgb(0, 0, 0);
+    border: solid 1px #5a4545;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 1.2em;
+    padding: 15px 8px;
+    width: 180px;
+    margin: 10px;"}
+
+  </style>
+  </head>
+<body style="margin:0px;min-width:320px; max-width:808px !important;">
+
+<div id="game" class="wrapper hidden" style="min-width:320px; max-width:808px !important;">
+
+    <h3 id="catagoryName">
+
+    </h3>
+  <!--<p id="mylives"></p>-->
+    <!-- <button id="hint">Hint</button> -->
+    <div id="hold">
+    </div>
+
+<div id="infoModal" class="hoh2  hidden"></div>
+<div id="hint" class="hoh2  hidden"></div>
+<div id="animation_container" style="background-color:rgba(204, 204, 204, 1.00); width:200px; height:200px;margin-top: 10px;">
+		<canvas id="canvas" width="200" height="200">Your browser doesn't support HTML Canvas... sorry about that.</canvas>
+		<div id="dom_overlay_container" style="pointer-events:none; overflow:hidden; width:200px; height:200px; position: absolute; left: 0px; top: 0px; display: block;">
+		</div>
+  </div>
+  
+
+     <!-- <canvas id="stickman" width="200px" height="200px">This Text will show if the Browser does NOT support HTML5 Canvas tag</canvas> -->
+     <div id="buttons">
+     </div>
+
+         <p id="clue"></p>
+
+    <div class="container">
+<!--
+      <button id="reset">Play again</button> -->
+    </div>
+</div>
+    <div id="introView" class="container" style="min-width:300px; max-width:808px !important;background-color:#eeeeee; padding:5px;Border-radius:24px;">
+<div class="row" style="padding:10px">
+
+    <div class="col-xs-12 col-md-12">
+    <h5> A movie-themed word guessing game. Each week there are eight unique names to solve. The names have all appeared in this week's module. Have fun guessing letter by letter!</h5><BR>
+
+    <h2 style="text-transform:none;"> How to play </h2>
+    <ul style="display:inline-block">
+    <li> Guess the letters to correctly spell a name of a person of interest to the theme of this week's module
+    <li>  If you guess correctly, the letter will automatically fill in to the corresponding space(s)
+    <li>  To guess the name correctly, you must fill out all the spaces in the name
+    <li> If you pick too many incorrect letters, the game will go up in flames
+    <li> Click the "New Game" Button to start the game
+
+    </ul>
+
+
+
+    <BR> <button class='modalReset' onclick='reset()'>New Game</button>
+    </div>
+    </div>
+</div>
+
+    <script>
+    window.onload = function () {
+var nothing = [];
+var currentArray = nothing;
+
+
+
+  var alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
+        'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+        't', 'u', 'v', 'w', 'x', 'y', 'z','hint', 'new game'];
+
+  var answers;         // Array of topics
+  var chosenAnswer;     // Selected catagory
+  var getHint ;          // Word getHint
+  var word ;              // Selected word
+  var guess ;             // Geuss
+  var geusses = [ ];      // Stored geusses
+  var lives ;             // Lives
+  var counter ;           // Count correct geusses
+  var space;              // Number of spaces in word '-'
+var fact; //Fact about the thing
+  // Get elements
+  //var showLives = document.getElementById("mylives");
+  var showCatagory = document.getElementById("scatagory");
+  var getHint = document.getElementById("hint");
+  var showClue = document.getElementById("clue");
+  var catagoryName = " ";
+
+
+  // create alphabet ul
+  var buttons = function () {
+    myButtons = document.getElementById('buttons');
+    letters = document.createElement('ul');
+
+    for (var i = 0; i < alphabet.length; i++) {
+      letters.id = 'alphabet';
+      list = document.createElement('li');
+      list.id = 'letter'+i;
+      list.setAttribute('class', 'letter');
+      list.innerHTML = alphabet[i];
+      check(list);
+      myButtons.appendChild(letters);
+      letters.appendChild(list);
+    }
+  }
+
+
+  // Select Catagory
+  var selectCat = function () {
+    if (chosenAnswer === answers[0]) {
+      catagoryName = "Film";
+    } else if (chosenAnswer === answers[1]) {
+      catagoryName = "Actor";
+    } else if (chosenAnswer === answers[2]) {
+      catagoryName = "Location";
+    }
+      //showLives.innerHTML = catagoryName +" (" + lives + ") ";
+  }
+
+  // Create geusses ul
+   result = function () {
+    wordHolder = document.getElementById('hold');
+    correct = document.createElement('ul');
+     space = 0;
+    for (var i = 0; i < word.length; i++) {
+      correct.setAttribute('id', 'my-word');
+      guess = document.createElement('li');
+      guess.setAttribute('class', 'guess');
+      if (word[i] === "-") {
+        guess.innerHTML = " ";
+              guess.setAttribute('class', 'break');
+        space++;
+      } else {
+        guess.innerHTML = "_";
+      }
+
+      geusses.push(guess);
+      wordHolder.appendChild(correct);
+      correct.appendChild(guess);
+    }
+  }
+
+  // Show lives
+   comments = function () {
+   // showLives.innerHTML = catagoryName +" (" + lives + ") ";
+    if (lives < 1) {
+      showLives.innerHTML = "FIN!";
+    }
+    for (var i = 0; i < geusses.length; i++) {
+      if (counter + space === geusses.length) {
+     //   showLives.innerHTML = "You Win!";
+      }
+    }
+  }
+
+      // Animate man
+      var animatingTimeout;
+      var changeMode= function(){
+        mode = "clean";
+      }
+  var animate = function () {
+   if (lives >= 0){
+   //var drawMe = lives ;
+   mode = "animating";
+   drawArray[lives]();
+   clearTimeout(animatingTimeout);
+   animatingTimeout = setTimeout(changeMode,2500);
+
+ }
+
+  }
+
+
+
+
+
+  nothingDraw = function(){
+    exportRoot.gotoAndStop(0);
+  }
+  introFrame = function(){
+    exportRoot.gotoAndPlay(1);
+  }
+  fullProjector = function(){
+    exportRoot.gotoAndPlay(2);
+  }
+  switchOn = function(){
+    exportRoot.gotoAndPlay(36);
+  }
+  breaking = function(){
+    exportRoot.gotoAndPlay(90);
+  }
+  burnonScreenDraw = function(){
+    exportRoot.gotoAndPlay(121);
+  }
+  smokingDraw = function(){
+    exportRoot.gotoAndPlay(136);
+  }
+  fireDraw = function(){
+    exportRoot.gotoAndPlay(151);
+  
+  }
+     
+//  drawArray = [eyeDraw,showerBloodDraw,knifeDraw,showerDraw,womanShowerDraw,womanDraw,hitchcockDraw,nothingDraw];
+
+ drawArray = [fireDraw,smokingDraw,burnonScreenDraw,breaking,switchOn,fullProjector,introFrame,nothingDraw];
+
+  // OnClick Function
+   check = function (list) {
+    list.onclick = list.touchend = function (e) {
+  // var el = document.documentElement,
+    //  rfs = el.requestFullscreen.o
+   //     || el.webkitRequestFullScreen
+  //      || el.mozRequestFullScreen
+ //       || el.msRequestFullscreen     ;
+//
+//    rfs.call(el);
+
+
+
+      var geuss = (this.innerHTML);
+      console.log(geuss);
+
+      if (geuss.toLowerCase() =="new game") {
+        reset();
+
+
+        return;
+      }
+
+
+      this.setAttribute("class", "active");
+      this.onclick = null;
+      if (lives == 0){
+        
+
+
+
+
+      return;
+}
+
+    if (geuss.toLowerCase() =="hint") {
+        showHint();
+        console.log("hint");
+        return;
+      }
+
+    //    e.stopPropagation();
+  //  e.preventDefault();
+//  var openTiles = 10;
+hideHint();
+      for (var i = 0; i < word.length; i++) {
+        if (word[i].toLowerCase() == geuss.toLowerCase()) {
+          geusses[i].innerHTML = word[i];
+          counter += 1;
+          var guessTiles = document.querySelectorAll(".guess");
+          var tilesLeft = 0;
+          for (var j=0; j<guessTiles.length; j++ ){
+            if (guessTiles[j].innerHTML ==  "_"){
+              tilesLeft++;
+            }
+
+
+          }
+          if (tilesLeft == 0){
+            console.log("WINNER");
+            winMode();
+          }
+
+        }
+      }
+      var j = (word.toLowerCase().indexOf(geuss));
+      if (j === -1) {
+        lives -= 1;
+        //comments();
+        animate();
+       console.log("animate");
+       if (lives == 0 ){
+        console.log('end of game');
+        lostMode();
+       }
+      } else {
+        //comments();
+      }
+    }
+  }
+ winMode = function(){
+openPopup("win");
+// scoreIt(10);
+ }
+
+ lostMode = function(){
+   openPopup("lost");
+ }
+
+openPopup = function(winorlose){
+
+var htmlForModal="";
+timeformodal = 200;
+  if ( winorlose == "win"){
+    htmlForModal = "<h2>Correct</h2>";
+  } else {
+    htmlForModal = "<h2>FIN!</h2>";
+    timeformodal = 4500;
+  }
+  for (var i = 0; i < alphabet.length; i++) {
+
+myElement = document.getElementById('letter'+i);
+myElement.setAttribute('class', 'active');
+myElement.onclick = null;
+}
+document.getElementById("infoModal").innerHTML = htmlForModal +"<h3>" + word.replace(/-/g," ")  +"</h3><BR>" + fact+"<BR> <button class='modalReset' onclick='reset()'>New Game</button>";
+
+setTimeout(function(){ show(document.getElementById("infoModal")); }, timeformodal);
+
+
+
+}
+
+
+ scoreIt = function(newScore) {
+   score = Math.max(newScore);
+
+   decimalScore =  score/10;
+
+    fetch("rest.php?action=write&newgrade="+decimalScore+"&PHPSESSION=").then(function(response){
+		return response.json()
+	}).then(function(json) {
+		//debugger;
+console.log(json);
+	})
+}
+
+  // Play
+
+var answerOrdinal = -1;
+
+  play = function () {
+    answerOrdinal++;
+    answers =
+
+    [{"word":"JOHN-BUCHAN","fact":"Novelist: Wrote The 39 Steps (1915), the source material of the film by the same name.","hint":"Novelist"},{"word":"CHARLES-BENNETT","fact":"Screenwriter: Blackmail, The Man Who Knew Too Much, The 39 Steps, Secret Agent, Sabotage and Young and Innocent.","hint":"Screenwriter"},{"word":"JOAN-HARRISON","fact":"Screenwriter: Started as Hitchcock\u2019s secretary in 1933, uncredited contributions to scripts throughout 1930s, first credit as screenwriter, Jamaica Inn (1939) and many 1940s Hitchcock pictures.","hint":"Screenwriter"},{"word":"JOSEPH-CONRAD","fact":"Novelist: Wrote The Secret Agent, the source novel behind Sabotage (1936)","hint":"Novelist"},{"word":"IAN-HAY","fact":"Screenwriter and Humorist: Contributed dialogue to the screenplays for The 39 Steps (1935) Sabotage (1936) and Secret Agent (1936)","hint":"Screenwriter and Humorist"},{"word":"WILLIAM-SOMERSET-MAUGHAM","fact":"Playwright and Novelist: Wrote the novel Ashenden: Or the British Agent, the source material behind Secret Agent (1936)","hint":"Playwright and Novelist"},{"word":"ETHEL-LINA-WHITE","fact":"Novelist: Wrote The Wheel Spins (1936), the source material behind The Lady Vanishes (1938).","hint":"Novelist"}];
+//    chosenAnswer = answers[Math.floor(Math.random() * answers.length)];
+//  chosenAnswerRandom = Math.floor(Math.random() * answers.length);
+
+if (answerOrdinal == answers.length) {
+  answerOrdinal = 0;
+}
+    word = answers[answerOrdinal].word;
+    fact = answers[answerOrdinal].fact;
+      hint = answers[answerOrdinal].hint;
+    word = word.replace(/\s/g, "-");
+    console.log(word);
+    buttons();
+
+    geusses = [ ];
+    lives = 7;
+    counter = 0;
+    space = 0;
+    result();
+    comments();
+    selectCat();
+   // canvas();
+  }
+
+ play();
+
+  // Hint
+
+    showHint = function() {
+      document.getElementById("hint").innerHTML =  "<H2>" +hint+"</H2><BR> <button class='modalReset' onclick='hideHint()'>Hide Hint</button>";
+      show(document.getElementById("hint"));
+
+
+  };
+
+      hideHint = function() {
+        hide(document.getElementById("hint"));
+
+
+    };
+
+
+   // Reset
+
+function hide(el){
+	el.classList.add("hidden");
+}
+function show(el){
+el.classList.remove("hidden");
+}
+
+  reset = function() {
+    
+hide(document.getElementById("infoModal"));
+hide(document.getElementById("introView"));
+show(document.getElementById("game"));
+document.body.scrollTop = document.documentElement.scrollTop = 0;
+    correct.parentNode.removeChild(correct);
+    letters.parentNode.removeChild(letters);
+      mode = "animating";
+   clearTimeout(animatingTimeout);
+   animatingTimeout = setTimeout(changeMode,2500);
+   exportRoot.gotoAndStop(0);
+    //showClue.innerHTML = "";
+   // context.clearRect(0, 0, 400, 400);
+   play();
+  }
+}
+//window.onload = function () {setTimeout(function(){ window.init(); }, 2000);};
+init();
+    </script>
+</div>
+
+</body>
+</html>

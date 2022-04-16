@@ -1,0 +1,10 @@
+Which projects to Highlight
+
+OTTO - green *
+JFNew - yellow *
+Context - blue *
+Hangman - black*
+For The Birds - magenta*
+ZIPTIE - red *
+Active Learning Research Automation * - magenta 
+Public speaking
