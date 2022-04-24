@@ -15,12 +15,16 @@
             let n = d.getSeconds();
             var backgroundClasses = ["otto","jfnew", "context", "tcm", "ziptie","dart", "gdg"];
             var masthead = document.getElementById('masthead');
+            
             masthead.classList.remove(...masthead.classList);
             masthead.classList.add("container");
 
             masthead.classList.add(backgroundClasses[n%backgroundClasses.length]);
           
 
+            var thegameframe = document.getElementById("thegameframe");
+            var theGames = ["./hangman/index.html", "./hangman2/index.html", "./forthebirds/index.html","./socialhangman/index.html"]
+            thegameframe.src = theGames[n%theGames.length];
         };
     </script>
 </head>
@@ -332,10 +336,12 @@
                </div>
                </div>
                <div class="row">
-               <div class="col-sm">
-                 <img src="./images/tcm-hangman.jpg" class="img-fluid" alt="Preview Image of Hangman">
-               </div>
-               <div class="col-sm opaque-background">
+               <div class="col-md-12 col-sm-12 col-lg-7">
+                   <div class="embed-responsive embed-responsive-1by1" min-width="480px">
+                        <iframe id="thegameframe" src="./forthebirds/index.html"  alt="Inline iFrame" class="embed-responsive-item" ></iframe>
+                    </div>
+                </div>
+               <div class="col-md-12 col-sm-12 col-lg-5 opaque-background">
                 <h3>Opportunity!</h3>
                 <ul>
                     <li>
